@@ -5,6 +5,7 @@ import { StudentLayout } from '../../component/student-layout'
 import { useRouter } from "next/navigation";
 import Breadcrumbs from '../../component/brudcrums';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image'; // Import Next.js Image component
 import { 
   useCoursesInfiniteQuery, 
   useFilteredCourses, 
@@ -72,6 +73,42 @@ const filterVariants = {
       damping: 20
     }
   }
+};
+
+// Fallback image component to handle errors
+const CourseImage = ({ 
+  src, 
+  alt, 
+  className 
+}: { 
+  src: string; 
+  alt: string; 
+  className: string;
+}) => {
+  const [imgSrc, setImgSrc] = useState(src);
+  const [hasError, setHasError] = useState(false);
+
+  const fallbackImage = "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=300&h=150&fit=crop&auto=format";
+
+  return (
+    <div className={`relative ${className}`}>
+      <Image
+        src={hasError ? fallbackImage : imgSrc}
+        alt={alt}
+        fill
+        className="object-cover transition-transform duration-300 group-hover:scale-105"
+        onError={() => {
+          if (!hasError) {
+            setImgSrc(fallbackImage);
+            setHasError(true);
+          }
+        }}
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+        placeholder="blur"
+        blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaUMk9SQHL4wjXgwSq4rCsoqkkmWCXWUc7LHX5AA3eA3B8LMaOcWb2QY//Z"
+      />
+    </div>
+  );
 };
 
 export default function CoursesPage() {
@@ -431,15 +468,12 @@ export default function CoursesPage() {
                           layoutId={`course-${course._id}`}
                           onClick={() => handleStartCourse(course._id)}
                         >
-                          {/* Course Image */}
+                          {/* Course Image with Next.js Image component */}
                           <div className="relative h-28 overflow-hidden">
-                            <img
+                            <CourseImage
                               src={course.courseImage || "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=300&h=150&fit=crop&auto=format"}
                               alt={course.courseName}
-                              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                              onError={(e) => {
-                                e.currentTarget.src = "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=300&h=150&fit=crop&auto=format";
-                              }}
+                              className="w-full h-full"
                             />
                             <div className="absolute top-1.5 left-1.5">
                               <span className={`px-1.5 py-0.5 text-[10px] font-medium rounded-full ${
